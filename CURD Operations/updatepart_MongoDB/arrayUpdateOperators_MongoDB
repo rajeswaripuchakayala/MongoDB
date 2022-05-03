@@ -1,0 +1,133 @@
+db.users.find().pretty()
+{
+    "_id" : ObjectId("623ef6fee648db577fdbce05"),
+    "name" : "Max",
+    "hobbies" : [
+        {
+            "title" : "Sports",
+            "frequency" : 3
+        },
+        {
+            "title" : "Cooking",
+            "frequency" : 6
+        }
+    ],
+    "isSporty" : true
+}
+{
+    "_id" : ObjectId("623ef6fee648db577fdbce06"),
+    "name" : "Manuel",
+    "hobbies" : [
+        {
+            "title" : "Cooking",
+            "frequency" : 5
+        },
+        {
+            "title" : "Cars",
+            "frequency" : 2
+        }
+    ],
+    "totalAge" : 30
+}
+{
+    "_id" : ObjectId("623ef8d1e648db577fdbce07"),
+    "name" : "Anna",
+    "hobbies" : [
+        {
+            "title" : "Sports",
+            "frequency" : 2
+        },
+        {
+            "title" : "Yoga",
+            "frequency" : 3
+        }
+    ],
+    "isSporty" : true,
+    "totalAge" : null
+}
+{
+    "_id" : ObjectId("6242903b85260dd7047ff4ab"),
+    "name" : "Chris",
+    "hobbies" : [
+        {
+            "title" : "Sports",
+            "frequency" : 5
+        },
+        {
+            "title" : "Cooking",
+            "frequency" : 3
+        },
+        {
+            "title" : "Hiking",
+            "frequency" : 2
+        }
+    ],
+    "isSporty" : true,
+    "totalAge" : 80
+}
+{
+    "_id" : ObjectId("6242a93fb2bd9a3a0ee76047"),
+    "name" : "Maria",
+    "age" : 29,
+    "hobbies" : [
+        {
+            "title" : "Good Food",
+            "frequency" : 3
+        }
+    ]
+}
+
+//updating matching array documents
+db.users.find({"hobbies":{$elemMatch:{"title":"Sports", "frequency":{$gte:3}}}}).pretty() // i can only find two documents
+db.users.updateMany({"hobbies":{$elemMatch:{"title":"Sports", "frequency":{$gte:3}}}}, {$set: {"hobbies.$.highFrequency": true}})
+
+//updating all array elements
+
+db.users.updateMany({"hobbies":{$elemMatch:{"title":"Sports", "frequency":{$gte:3}}}},{$set:{"hobbies.$[].extraField": true}})
+
+//updating specific fields in Array
+
+db.users.updateMany({"hobbies.frequency":{$gt:2}},{$set:{"hobbies.$[el].goodFrequency":true}},{arrayFilters:[{"el.frequency":{$gt:2}}]})
+
+//Adding documnet to Array (by using Push, we can only do one document)
+
+db.users.updateOne({"name":"Maria"},{$push:{"hobbies":{"title":"Good Wine", "frequency":4}}})
+
+//Adding multiple documents to Array (using Push and Each)
+
+db.users.updateOne({"name":"Maria"},
+    {
+        $push:
+        {
+            "hobbies":
+            {
+                $each:
+                [
+                    {   "title":"Hiking", 
+                        "frequency":5
+                    },
+                    {   "title":"Good Wine", 
+                        "frequency":2
+                    }
+                ]
+            }
+        }
+    }
+)
+
+//removing documents from Array
+
+db.users.updateOne({"name":"Maria"},{$pull:{"hobbies":{"title":"Good Food"}}})
+
+//removes first document in Array
+
+db.users.updateOne({"name":"Maria"},{$pop:{"hobbies":-1}})
+//removes last document in Array
+db.users.updateOne({"name":"Maria"},{$pop:{"hobbies":1}})
+
+//$addToSet //it will add document to array 
+db.users.updateOne({"name":"Maria"},{"$addToSet":{"hobbies":{"title":"Good Food", "frequency":2}}})
+
+//what is difference between $push and $addToSet
+//$push -->we can add document to an Array, we can insert duplicate documents
+//$addToSet --> it will not support the duplicate entries

@@ -1,0 +1,126 @@
+> show dbs
+admin          0.000GB
+awesomeplaces  0.000GB
+companies      0.000GB
+config         0.000GB
+contactData    0.000GB
+flights        0.000GB
+hospital       0.000GB
+local          0.000GB
+movieData      0.000GB
+shop           0.000GB
+support        0.000GB
+> use movieData
+switched to db movieData
+> show collections
+movies
+
+//findOne --->it shows first matched document, it doen't gives a cursor
+
+> db.movies.findOne()   
+{
+        "_id" : ObjectId("623d4e82303f6f95496f3439"),
+        "id" : 8,
+        "url" : "http://www.tvmaze.com/shows/8/glee",
+        "name" : "Glee",
+        "type" : "Scripted",
+        "language" : "English",
+        "genres" : [
+                "Drama",
+                "Music",
+                "Romance"
+        ],
+        "status" : "Ended",
+        "runtime" : 60,
+        "premiered" : "2009-05-19",
+        "officialSite" : "http://www.fox.com/glee",
+        "schedule" : {
+                "time" : "21:00",
+                "days" : [
+                        "Tuesday"
+                ]
+        },
+        "rating" : {
+                "average" : 6.7
+        },
+        "weight" : 71,
+        "network" : {
+                "id" : 4,
+                "name" : "FOX",
+                "country" : {
+                        "name" : "United States",
+                        "code" : "US",
+                        "timezone" : "America/New_York"
+                }
+        },
+        "webChannel" : null,
+        "externals" : {
+                "tvrage" : 21704,
+                "thetvdb" : 83610,
+                "imdb" : "tt1327801"
+        },
+        "image" : {
+                "medium" : "http://static.tvmaze.com/uploads/images/medium_portrait/0/73.jpg",
+                "original" : "http://static.tvmaze.com/uploads/images/original_untouched/0/73.jpg"
+        },
+        "summary" : "<p><b>Glee </b>is a musical comedy about a group of ambitious and talented young adults in search of strength,aacceptance and, ultimately, their voice.</p>",
+        "updated" : 1536145055,
+        "_links" : {
+                "self" : {
+                        "href" : "http://api.tvmaze.com/shows/8"
+                },
+                "previousepisode" : {
+                        "href" : "http://api.tvmaze.com/episodes/142185"
+                }
+        }
+}
+
+//find() --->it shows all documents and gives cursor (type "it" for more)
+
+db.movies.find().pretty()
+db.movies.find({name:"The Last Ship"}).pretty() // It checks for the name and displays the following document
+
+{
+        "_id" : ObjectId("623d4e82303f6f95496f344c"),
+        "id" : 21,
+        "url" : "http://www.tvmaze.com/shows/21/the-last-ship",
+        "name" : "The Last Ship",
+        "type" : "Scripted",
+        "language" : "English",
+        "genres" : [
+                "Drama",
+                "Action",
+                "Thriller"
+        ],
+        "status" : "Running",
+        "runtime" : 60,
+        "premiered" : "2014-06-22",
+        "officialSite" : "http://www.tntdrama.com/shows/the-last-ship",
+        "schedule" : {
+                "time" : "21:00",
+                "days" : [
+                        "Sunday"
+                ]
+        },
+        "rating" : {
+                "average" : 7.8
+        },
+        "weight" : 100,
+        "network" : {
+                "id" : 14,
+                "name" : "TNT",
+                "country" : {
+                        "name" : "United States",
+                },
+                "previousepisode" : {
+                        "href" : "http://api.tvmaze.com/episodes/1499133"
+                },
+                "nextepisode" : {
+                        "href" : "http://api.tvmaze.com/episodes/1499134"
+                }
+        }
+}
+
+db.movies.findOne({runtime:60}) // runtime 60 has multiple documents but it displays only one document because we use findOne method
+
+

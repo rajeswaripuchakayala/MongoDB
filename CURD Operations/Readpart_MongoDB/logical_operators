@@ -1,0 +1,26 @@
+$and, $or, $nor, $not
+
+// $or
+db.movies.find({$or:[{"rating.average":{$lt:5}},{"rating.average":{$gt:9.3}}]}).pretty() //it shows the documents that less than 5 and greater than 9.3
+db.movies.find({$or:[{"rating.average":{$lt:5}},{"rating.average":{$gt:9.3}}]}).count() //it shows 4 documents
+
+// $nor
+db.movies.find({$nor:[{"rating.average":{$lt:5}},{"rating.average":{$gt:9.3}}]}).count()// it opposite for the above condition, it shows 236 documents
+
+//$and
+1. db.movies.find({"rating.average":{$gt:9},{genres:"Drama"}).count() //it shows 3 documents
+
+2. db.movies.find({$and:[{"rating.average":{$gt:9}},{genres:"Drama"}]}).count()// it shows 3 documents
+
+// 2 cases are showing same results, then what is the difference???
+
+3. db.movies.find({genres:"Drama", genres:"Horror"}).count() //it shows 23 documents
+4. db.movies.find({genres:"Horror"}) //this also shows 23 documents because same object("genres) is not permitted, so it's consider the  second condition (genres:"Horror") in 3 point
+
+5. db.movies.find({$and:[{genres:"Drama"},{genres:"Horror"}]}).count()// it shows 17 documents that genres must have both Drama and Horror
+
+$not
+
+db.movies.find({runtime:{$not:{$eq:60}}}).count() //it shows 70 documents
+
+db.movies.find({runtime:{$ne:60}}).count() //this also shows the same results (70 documents)

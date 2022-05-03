@@ -1,0 +1,217 @@
+
+db.places.insertOne(
+    {
+        "name":"Conservatory of Flowers",
+        "location":{
+            "type": "Point",
+            "coordinates": [
+                -122.4622192,
+                37.7720293
+            ]
+        }
+    }
+)
+
+db.places.insertOne(
+    {
+        "name": "Golden Gate Park Tennis Courts",
+        "location": {
+            "type": "Point",
+            "coordinates": [
+                -122.4611832,
+                37.7701884
+            ]
+        }
+    }
+)
+
+db.places.insertOne(
+    {
+        "name": "Nopa",
+        "location": {
+            "type": "Point",
+            "coordinates": [
+                -122.439697,
+                37.7749051
+            ]
+        }
+    }
+)
+db.places.find().pretty()
+//we have 4 documents
+{                                                                                                                                                                           
+        "_id" : ObjectId("624d18e17c652289ba849005"),
+        "name" : "California Academy of Sciences",
+        "location" : {
+                "type" : "Point",
+                "coordinates" : [
+                        -122.4774518,
+                        37.7658392
+                ]
+        }
+}
+{
+        "_id" : ObjectId("624d32c47c652289ba849009"),
+        "name" : "Conservatory of Flowers",
+        "location" : {
+                "type" : "Point",
+                "coordinates" : [
+                        -122.4622192,
+                        37.7720293
+                ]
+        }
+}
+{
+        "_id" : ObjectId("624d36547c652289ba84900a"),
+        "name" : "Golden Gate Park Tennis Courts",
+        "location" : {
+                "type" : "Point",
+                "coordinates" : [
+                        -122.4611832,
+                        37.7701884
+                ]
+        }
+}
+{
+        "_id" : ObjectId("624d520e7c652289ba84900b"),
+        "name" : "Nopa",
+        "location" : {
+                "type" : "Point",
+                "coordinates" : [
+                        -122.439697,
+                        37.7749051
+                ]
+        }
+}
+
+/********************* Finding places inside a specific area ***************************/
+
+> const c1=[ -122.45484, 37.77469]           
+> const c2=[-122.45319, 37.76648]           
+> const c3=[-122.51023, 37.76418]           
+> const c4=[-122.51087, 37.7713]
+
+db.places.find({location:{$geoWithin:{$geometry:{type:"Polygon", coordinates:[[c1,c2,c3,c4,c1]]}}}}).pretty()
+//it shows only 3 documents becuase 3 documents are placed in polygon area and 4th place added outside the polygon (c4)
+{
+        "_id" : ObjectId("624d32c47c652289ba849009"),
+        "name" : "Conservatory of Flowers",
+        "location" : {
+                "type" : "Point",
+                "coordinates" : [
+                        -122.4622192,
+                        37.7720293
+                ]
+        }
+}
+{
+        "_id" : ObjectId("624d36547c652289ba84900a"),
+        "name" : "Golden Gate Park Tennis Courts",
+        "location" : {
+                "type" : "Point",
+                "coordinates" : [
+                        -122.4611832,
+                        37.7701884
+                ]
+        }
+}
+{
+        "_id" : ObjectId("624d18e17c652289ba849005"),
+        "name" : "California Academy of Sciences",
+        "location" : {
+                "type" : "Point",
+                "coordinates" : [
+                        -122.4774518,
+                        37.7658392
+                ]
+        }
+}
+
+/************************* Finding out if a user is inside a specific are *****************************/
+
+//first we have to store the areas into database
+
+db.areas.insertOne({"name": "Golden Gate Part", "area":{"type": "Polygon", "coordinates":[[c1,c2,c3,c4,c1]]}})
+
+{
+    "acknowledged" : true,
+    "insertedId" : ObjectId("624d60d27c652289ba84900c")
+}
+> db.areas.find().pretty()
+{
+    "_id" : ObjectId("624d60d27c652289ba84900c"),
+    "name" : "Golden Gate Part",
+    "area" : {
+            "type" : "Polygon",
+            "coordinates" : [
+                    [
+                            [
+                                    -122.45484,
+                                    37.77469
+                            ],
+                            [
+                                    -122.45319,
+                                    37.76648
+                            ],
+                            [
+                                    -122.51023,
+                                    37.76418
+                            ],
+                            [
+                                    -122.51087,
+                                    37.7713
+                            ],
+                            [
+                                    -122.45484,
+                                    37.77469
+                            ]
+                    ]
+            ]
+    }
+}
+//Creating index
+
+db.areas.createIndex({area:"2dsphere"})
+{
+        "numIndexesBefore" : 1,
+        "numIndexesAfter" : 2,
+        "createdCollectionAutomatically" : false,
+        "ok" : 1
+}
+
+//finding area, if it's find the area within polygon. it's shows all coordinates of polygon
+
+db.areas.find({area:{$geoIntersects:{$geometry:{type:"Point", coordinates:[-122.48371, 37.77059]}}}}).pretty()
+{
+        "_id" : ObjectId("624d60d27c652289ba84900c"),
+        "name" : "Golden Gate Part",
+        "area" : {
+                "type" : "Polygon",
+                "coordinates" : [
+                        [
+                                [
+                                        -122.45484,
+                                        37.77469
+                                ],
+                                [
+                                        -122.45319,
+                                        37.76648
+                                ],
+                                [
+                                        -122.51023,
+                                        37.76418
+                                ],
+                                [
+                                        -122.51087,
+                                        37.7713
+                                ],
+                                [
+                                        -122.45484,
+                                        37.77469
+                                ]
+                        ]
+                ]
+        }
+}
+//This coordinates are outside of the polygon, so it couldn't find the documents that are in the database
+db.areas.find({area:{$geoIntersects:{$geometry:{type:"Point", coordinates: [-122.46479, 37.77622]}}}})

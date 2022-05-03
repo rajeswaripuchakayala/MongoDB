@@ -1,0 +1,68 @@
+$exist, $type
+
+db.users.insertMany(
+    [
+        {
+            name:"Max", 
+            hobbies:
+            [
+                {
+                    title:"Sports", 
+                    frequency:3
+                },
+                {   title:"Cooking", 
+                    frequency:6
+                }
+            ], 
+            phone: 0131782734
+        },
+        {
+            name:"Manuel",
+            hobbies:[
+                {
+                    title:"Cooking",
+                    frequency:5
+                },
+                {
+                    title:"Cars",
+                    frequency:2
+                }
+            ],
+            phone: "01217972",
+            age:30
+        }
+    ]
+)
+
+db.users.find({age:{$exists:true}}).pretty() // it shows 2nd document
+db.users.find({age:{$exists:false}}).pretty() //it shows 1st document
+
+db.users.insertOne(
+    {
+        name:"Anna",
+        hobbies:[
+            {
+                title:"Sports",
+                frequency:2
+            },
+            {
+                title:"Yoga",
+                frequency:3
+            }
+        ],
+        phone:"80811987291",
+        age:null
+    }
+)
+
+db.users.find({age:{$exists:true}}).pretty() //now it's shows 2 documents, 2nd document has age field eventhough value is null
+
+db.users.find({age:{$exists:true, $gte:30}}).pretty()
+db.users.find({age:{$exists:true, $ne:null}}).pretty()
+
+
+$type
+db.users.find({phone:{$type:"number"}}).pretty() //
+db.users.find({phone:{$type:"double"}}).pretty() // number and double both are the shows the same results
+db.users.find({phone:{$type:"string"}}).pretty()
+db.users.find({phone:{$type:["double","string"]}}).pretty()

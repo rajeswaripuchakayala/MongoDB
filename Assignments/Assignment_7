@@ -1,0 +1,15 @@
+// Find the total persons and average of the persons that age greater than 50
+
+db.persons.aggregate(
+    [
+        {
+            $match:{"dob.age":{$gt:50}}
+        },
+        {
+            $group:{_id:{gender:"$gender"}, totalPersons:{$sum:1}, avgAge:{$avg:"$dob.age"}}
+        },
+        {
+            $sort:{totalPersons:-1}
+        }
+    ]
+).pretty()

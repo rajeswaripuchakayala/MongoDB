@@ -1,0 +1,24 @@
+// 1. Import the attached data file into a collection (e.g exmovieStarts) in the boxOffice database
+// 2. find all movies with exactly two genres
+// 3. find all movies which aired in 2018
+// 4. find all movies which have ratings greater than 8 but lower than 10
+
+//Task1
+
+PS C:\Program Files\MongoDB\Server\5.0\bin> mongoimport boxoffice-extended.json -d boxOffice -c exmovieStarts --jsonArray --drop
+2022-03-28T13:08:47.947+0530    connected to: mongodb://localhost/
+2022-03-28T13:08:47.948+0530    dropping: boxOffice.exmovieStarts
+2022-03-28T13:08:47.958+0530    3 document(s) imported successfully. 0 document(s) failed to import.
+
+
+//Task2
+
+db.exmovieStarts.find({genre:{$size:2}})
+
+//Task3
+
+db.exmovieStarts.find({"meta.aired": 2018})
+
+//Task4
+
+db.exmovieStarts.find({ratings:{$elemMatch:{$gt:8, $lt:10}}}).pretty()

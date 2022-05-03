@@ -1,0 +1,14 @@
+// 1. Create a new collection ("sports") and upsert two new documents into it (with these fields: "title", "requiresTeam")
+// 2. Update all documents which do require a team by adding a new field with the minimum amount of players required
+// 3. Update all documents that require a team by increasing the number of required players by 10 
+
+//Task1
+db.sports.updateMany({"title": "Chess"},{$set:{requiredTeam:false}},{upsert:true})
+db.sports.updateMany({"title":"Shuttle"}, {$set:{requiredTeam:true}},{upsert:true})
+
+//Task2
+db.sports.updateMany({requiredTeam:true}, {$set:{"minimunPlayers":20}})
+
+//Task3
+db.sports.updateMany({requiredTeam:true},{$inc:{"minimunPlayers":10}})
+

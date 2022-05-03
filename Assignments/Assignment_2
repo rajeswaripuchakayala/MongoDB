@@ -1,0 +1,227 @@
+
+// 1. Insert multiple companies (company data of your choice) into a collection - both with insertOne() and insertMany()
+// 2. Deliberately insert duplicate ID data and fix failing additions with unordered inserts
+// 3. Write data for a new company with both journaling being guaranteed and not being guaranteed
+
+> use companies
+switched to db companies
+
+// 1. Insert multiple companies (company data of your choice) into a collection - both with insertOne() and insertMany()
+
+db.companiesData.insertMany([
+    {
+        _id: 1,
+        companyName: "Vishesh",
+        description: "IT company",
+        employees: 100,
+        companyEmail: "vishesh@gmail.com",
+        mobile: "32489247983"
+    },
+    {
+        _id: 2,
+        companyName: "Cognizant",
+        description: "IT company",
+        employees: "33090",
+        companyEmail: "cognizant@gmail.com",
+        mobile: "834898843"
+    },
+    {
+        _id: 3,
+        companyName: "TCS",
+        description: "IT and consulting company",
+        employees: "4327891",
+        companyEmail: "tcs@gmail.com",
+        mobile: "8745732893"
+    }
+])
+
+{ "acknowledged" : true, "insertedIds" : [ 1, 2, 3 ] }
+
+> db.companiesData.find().pretty()
+{
+    "_id" : 1,
+    "companyName" : "Vishesh",
+    "description" : "IT company",
+    "employees" : 100,
+    "companyEmail" : "vishesh@gmail.com",
+    "mobile" : "32489247983"
+}
+{
+    "_id" : 2,
+    "companyName" : "Cognizant",
+    "description" : "IT company",
+    "employees" : "33090",
+    "companyEmail" : "cognizant@gmail.com",
+    "mobile" : "834898843"
+}
+{
+    "_id" : 3,
+    "companyName" : "TCS",
+    "description" : "IT and consulting company",
+    "employees" : "4327891",
+    "companyEmail" : "tcs@gmail.com",
+    "mobile" : "8745732893"
+}
+
+// 2. Deliberately insert duplicate ID data and fix failing additions with unordered inserts
+
+>db.companiesData.insertMany([
+    {
+        "_id" : 3,
+        "companyName" : "Intel",
+        "description" : "Semiconductor company",
+        "employees" : "38r892",
+        "companyEmail" : "intel@gmail.com",
+        "mobile" : "+3489298433"
+    },
+    {
+        "_id" : 4,
+        "companyName" : "Microsoft",
+        "description" : "Technology company",
+        "employees" : "745893",
+        "companyEmail" : "microsoft@gmail.com",
+        "mobile" : "+327489728849"
+    }
+])
+/*********Duplicate key error message********************/
+uncaught exception: BulkWriteError({
+        "writeErrors" : [
+                {
+                        "index" : 0,
+                        "code" : 11000,
+                        "errmsg" : "E11000 duplicate key error collection: companies.companiesData index: _id_ dup key: { _id: 3.0 }",
+                        "op" : {
+                                "_id" : 3,
+                                "companyName" : "Intel",
+                                "description" : "Semiconductor company",
+                                "employees" : "38r892",
+                                "companyEmail" : "intel@gmail.com",
+                                "mobile" : "+3489298433"
+                        }
+                }
+        ],
+        "writeConcernErrors" : [ ],
+        "nInserted" : 0,
+        "nUpserted" : 0,
+        "nMatched" : 0,
+        "nModified" : 0,
+        "nRemoved" : 0,
+        "upserted" : [ ]
+}) :
+BulkWriteError({
+        "writeErrors" : [
+                {
+                        "index" : 0,
+                        "code" : 11000,
+                        "errmsg" : "E11000 duplicate key error collection: companies.companiesData index: _id_ dup key: { _id: 3.0 }",
+                        "op" : {
+                                "_id" : 3,
+                                "companyName" : "Intel",
+                                "description" : "Semiconductor company",
+                                "employees" : "38r892",
+                                "companyEmail" : "intel@gmail.com",
+                                "mobile" : "+3489298433"
+                        }
+                }
+        ],
+        "writeConcernErrors" : [ ],
+        "nInserted" : 0,
+        "nUpserted" : 0,
+        "nMatched" : 0,
+        "nModified" : 0,
+        "nRemoved" : 0,
+        "upserted" : [ ]
+})
+
+/**************************************************************/
+
+db.companiesData.insertMany([
+    {
+        _id : 3,
+        companyName : "Intel",
+        description : "Semiconductor company",
+        employees : "38r892",
+        companyEmail : "intel@gmail.com",
+        mobile : "+3489298433"
+    },
+    {
+        _id : 4,
+        companyName : "Microsoft",
+        description : "Technology company",
+        employees : "745893",
+        companyEmail : "microsoft@gmail.com",
+        mobile : "+327489728849"
+    }
+], {ordered: false})
+
+//////////////////////////
+
+db.companiesData.find().pretty()
+{
+    "_id" : 1,
+    "companyName" : "Vishesh",        
+    "description" : "IT company",
+    "employees" : 100,
+    "companyEmail" : "vishesh@gmail.com",
+    "mobile" : "32489247983"
+}
+{
+    "_id" : 2,
+    "companyName" : "Cognizant",
+    "description" : "IT company",
+    "employees" : "33090",
+    "companyEmail" : "cognizant@gmail.com",
+    "mobile" : "834898843"
+}
+{
+    "_id" : 3,
+    "companyName" : "TCS",
+    "description" : "IT and consulting company",
+    "employees" : "4327891",
+    "companyEmail" : "tcs@gmail.com",
+    "mobile" : "8745732893"
+}
+{
+    "_id" : 4,
+    "companyName" : "Microsoft",
+    "description" : "Technology company",
+    "employees" : "745893",
+    "companyEmail" : "microsoft@gmail.com",
+    "mobile" : "+327489728849"
+}
+
+///////////////////////////////////////////////////////
+
+// 3. Write data for a new company with both journaling being guaranteed and not being guaranteed
+
+db.companiesData.insertOne(
+    {
+        _id : 5,
+        companyName : "Johnson & Johnson",
+        description : "Medical company",
+        employees : "753727",
+        companyEmail : "Johnson@gmail.com",
+        mobile : "8736473688"
+    },
+    {
+        writeConcern:{w:1, j:false}
+    }
+)
+
+{ "acknowledged" : true, "insertedId" : 5 }
+
+db.companiesData.insertOne(
+    {
+        _id : 6,
+        companyName : "Pfizer",
+        description : "Medical company",
+        employees : "98328809",
+        companyEmail : "pfizer@gmail.com",
+        mobile : "728748787988"
+    },
+    {
+        writeConcern:{w:1, j:true}
+    }
+)
+
+{ "acknowledged" : true, "insertedId" : 6 }

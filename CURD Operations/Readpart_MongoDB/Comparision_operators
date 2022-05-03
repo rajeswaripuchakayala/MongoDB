@@ -1,0 +1,51 @@
+// $eq
+//both are having the same results
+db.movies.find({runtime:{$eq:60}}).pretty()
+
+db.movies.find({runtime:60}).pretty() //this is default equal 
+
+//$ne
+db.movies.find({runtime:{$ne:60}})
+
+//$gt
+
+db.movies.find({runtime:{$gt:40}})
+
+$gte
+
+db.movies.find({runtime:{$gte:42}})
+
+$lt
+
+db.movies.find({runtime:{$lt:80}})
+
+$lte
+
+db.movies.find({runtime:{$lte:80}})
+
+$in 
+db.movies.find({runtime:{$in:[30,42]}}).pretty() // it will shows only documents, runtime has 30 or 42
+
+$nin
+db.movies.find({runtime:{$nin:[30,42]}}).pretty() //it's opposite for the above condition
+
+
+/******Querying Embedded Fields and Arrays*******************/
+//embedded documents
+
+db.movies.find({"rating.average":{$gte:7}})
+
+//Arrays
+
+db.movies.findOne({genres:"Drama"})
+//output -->this shows whole array that has genres:Drama
+"genres" : [
+                "Drama",
+                "Music",
+                "Romance"
+        ]
+db.movies.findOne({genres:["Drama"]})
+//output --> this shows the array that has only genres:Drama
+"genres" : [
+                "Drama"
+        ]

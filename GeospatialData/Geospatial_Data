@@ -1,0 +1,117 @@
+
+/*************** Adding GeoJSON Data ********************/
+
+use awesomeplaces
+switched to db awesomeplaces
+
+> show collections
+places
+
+db.places.insertOne({"name": "California Academy of Sciences", location:{type:"point", coordinates:[-122.4774518, 37.7658392]}})
+{
+        "acknowledged" : true,
+        "insertedId" : ObjectId("624d18e17c652289ba849005")
+}
+> db.places.findOne()
+{
+        "_id" : ObjectId("624d18e17c652289ba849005"),
+        "name" : "California Academy of Sciences",
+        "location" : {
+                "type" : "Point",
+                "coordinates" : [
+                        -122.4774518,
+                        37.7658392
+                ]
+        }
+}
+
+/************** Running Geo Queries *****************/
+
+db.places.find({location:{$near:{$geometry:{type : "Point",
+                coordinates : [
+                        -122.4774518,
+                        37.7658392
+                ]}}}})
+
+//Above query fails because this query has not geospatial index
+
+Error: error: {
+        "ok" : 0,
+        "errmsg" : "error processing query: ns=awesomeplaces.placesTree: GEONEAR  field=location maxdist=1.79769e+308 isNearSphere=0\nSort: {}\nProj: {}\n planner returned error :: caused by :: unable to find index for $geoNear query",
+        "code" : 291,
+        "codeName" : "NoQueryExecutionPlans"
+}
+
+/****************** Adding Geospatial Index to track the distance ***************************/
+//create index
+
+db.places.createIndex({location:"2dsphere"})
+
+//created index
+{
+        "numIndexesBefore" : 1,
+        "numIndexesAfter" : 2,
+        "createdCollectionAutomatically" : false,
+        "ok" : 1
+}
+
+db.places.getIndexes()
+// we have two indexes on _id and location
+[
+        {
+                "v" : 2,
+                "key" : {
+                        "_id" : 1
+                },
+                "name" : "_id_"
+        },
+        {
+                "v" : 2,
+                "key" : {
+                        "location" : "2dsphere"
+                },
+                "name" : "location_2dsphere",
+                "2dsphereIndexVersion" : 3
+        }
+]
+
+/************** Running Geo Queries *****************/
+
+db.places.find({location:{$near:{$geometry:{type : "Point",
+                coordinates : [
+                        -122.4774518,
+                        37.7658392
+                ]}}}})
+
+//We can able to see the document with out error by creating index
+{
+        "_id" : ObjectId("624d18e17c652289ba849005"),
+        "name" : "California Academy of Sciences",
+        "location" : {
+                "type" : "Point",
+                "coordinates" : [
+                        -122.4774518,
+                        37.7658392
+                ]
+        }
+}
+
+db.places.find(
+    {
+        location:
+        {
+            $near: 
+            {
+                $geometry:{
+                    type : "Point",
+                    coordinates : [
+                        -122.4774518,
+                        37.7658392
+                    ]
+                },
+                $maxDistance: 500,
+                $minDistance: 10
+            }
+        
+    }}   
+)

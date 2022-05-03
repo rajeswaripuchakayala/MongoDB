@@ -1,0 +1,284 @@
+/**********Get indexes*****************/
+
+db.persons.getIndexes() //returns current indexes for certain collection. by defalut there is one index i.e.(_id)
+
+db.getCollection('persons').getIndexes()
+
+/***********create indexes*****************/
+
+db.persons.createIndex({index: 1},{unique: true})
+
+db.persons.createIndex({name: 1},{background: true})
+
+db.persons.createIndex({age: 1},{name:"customAgeIndex"})
+
+/**********Query performance with index*****************/
+
+db.persons.find({age:{$gte:27}}).explain() //here we create index for age, so it will scan by indexscan
+
+db.persons.find({age:{$lt:25}}).explain("executionStats)
+
+/**********Query performance with out index********************/
+
+db.persons.find({favoriteFruit:"banana"}).explain() //here we do not create index for favoriteFruit, so it will scan all documents in persons collection
+
+/*************executionStats without index************************/
+
+db.persons.find({gender:"female"}).explain("executionStats")
+
+/***********indexes deletion*******************/
+
+db.persons.dropIndex({name:1}) //it will delete the index for name
+
+db.persons.dropIndex({age:1}) //it will delete the index for age
+
+db.persons.dropIndex({gender:1}) //it will delete the index for gender
+
+db.persons.dropIndexes() // it will delete the all indexes except _id
+
+db.persons.createIndex({"age":1}, {expireAfterSeconds:10}) // it will delete after the documents after the 10 seconds
+    Note: 
+    1) expireAfterSeconds will work on the data objects
+    2) it will only work on single field index not on compound index
+
+//covered queries
+db.customers.insertMany([{"name":"Max", "age":29, "salary":3000}, {"name":"Manu", "age": 30, "salary": 4000}])
+
+{
+    "acknowledged" : true,
+    "insertedIds" : [
+            ObjectId("624687ce1c32c8df10aaf049"),
+            ObjectId("624687ce1c32c8df10aaf04a")
+    ]
+}
+> db.customers.createIndex({name:1})
+{
+    "numIndexesBefore" : 1,
+    "numIndexesAfter" : 2,
+    "createdCollectionAutomatically" : false,
+    "ok" : 1
+}
+
+db.customers.explain("executionStats").find({name:"Max"},{_id:0,name:1})
+{
+        "explainVersion" : "1",
+        "queryPlanner" : {
+                "namespace" : "user.customers",
+                "indexFilterSet" : false,
+                "parsedQuery" : {
+                        "name" : {
+                                "$eq" : "Max"
+                        }
+                },
+                "maxIndexedOrSolutionsReached" : false,
+                "maxIndexedAndSolutionsReached" : false,
+                "maxScansToExplodeReached" : false,
+                "winningPlan" : {
+                        "stage" : "PROJECTION_COVERED",
+                        "transformBy" : {
+                                "_id" : 0,
+                                "name" : 1
+                        },
+                        "inputStage" : {
+                                "stage" : "IXSCAN",
+                                "keyPattern" : {
+                                        "name" : 1
+                                },
+                                "indexName" : "name_1",
+                                "isMultiKey" : false,
+                                "multiKeyPaths" : {
+                                        "name" : [ ]
+                                },
+                                "isUnique" : false,
+                                "isSparse" : false,
+                                "isPartial" : false,
+                                "indexVersion" : 2,
+                                "direction" : "forward",
+                                "indexBounds" : {
+                                        "name" : [
+                                                "[\"Max\", \"Max\"]"
+                                        ]
+                                }
+                        }
+                },
+                "rejectedPlans" : [ ]
+        },
+        "executionStats" : {
+                "executionSuccess" : true,
+                "nReturned" : 1,
+                "executionTimeMillis" : 0,
+                "totalKeysExamined" : 1,
+                "totalDocsExamined" : 0,
+                "executionStages" : {
+                        "stage" : "PROJECTION_COVERED",
+                        "nReturned" : 1,
+                        "executionTimeMillisEstimate" : 0,
+                        "works" : 2,
+                        "advanced" : 1,
+                        "needTime" : 0,
+                        "needYield" : 0,
+                        "saveState" : 0,
+                        "restoreState" : 0,
+                        "isEOF" : 1,
+                        "transformBy" : {
+                                "_id" : 0,
+                                "name" : 1
+                        },
+                        "inputStage" : {
+                                "stage" : "IXSCAN",
+                                "nReturned" : 1,
+                                "executionTimeMillisEstimate" : 0,
+                                "works" : 2,
+                                "advanced" : 1,
+                                "needTime" : 0,
+                                "needYield" : 0,
+                                "saveState" : 0,
+                                "restoreState" : 0,
+                                "isEOF" : 1,
+                                "keyPattern" : {
+                                        "name" : 1
+                                },
+                                "indexName" : "name_1",
+                                "isMultiKey" : false,
+                                "multiKeyPaths" : {
+                                        "name" : [ ]
+                                },
+                                "isUnique" : false,
+                                "isSparse" : false,
+                                "isPartial" : false,
+                                "indexVersion" : 2,
+                                "direction" : "forward",
+                                "indexBounds" : {
+                                        "name" : [
+                                                "[\"Max\", \"Max\"]"
+                                        ]
+                                },
+                                "keysExamined" : 1,
+                                "seeks" : 1,
+                                "dupsTested" : 0,
+                                "dupsDropped" : 0
+                        }
+                }
+        },
+        "command" : {
+                "find" : "customers",
+                "filter" : {
+                        "name" : "Max"
+                },
+                "projection" : {
+                        "_id" : 0,
+                        "name" : 1
+                },
+                "$db" : "user"
+        },
+        "serverInfo" : {
+                "host" : "DESKTOP-L6IQ400",
+                "port" : 27017,
+                "version" : "5.0.6",
+                "gitVersion" : "212a8dbb47f07427dae194a9c75baec1d81d9259"
+        },
+        "serverParameters" : {
+                "internalQueryFacetBufferSizeBytes" : 104857600,
+                "internalQueryFacetMaxOutputDocSizeBytes" : 104857600,
+                "internalLookupStageIntermediateDocumentMaxSizeBytes" : 104857600,
+                "internalDocumentSourceGroupMaxMemoryBytes" : 104857600,
+                "internalQueryMaxBlockingSortMemoryUsageBytes" : 104857600,
+                "internalQueryProhibitBlockingMergeOnMongoS" : 0,
+                "internalQueryMaxAddToSetBytes" : 104857600,
+                "internalDocumentSourceSetWindowFieldsMaxMemoryBytes" : 104857600
+        },
+        "ok" : 1
+}
+
+//text search
+//create two documents'
+
+db.products.insertMany([{"title":"A Book", "description":"This is a awesome book about a young artist!"},{"title":"Red T-Shirt", "description":"This T-Shirt is red and it's pretty awesome!"}])
+
+//create index on description field. if we specify description is 1 or -1 we can not able to search for word wise. we need to give whole description to check.
+b.products.createIndex({description: "text"})
+{
+        "numIndexesBefore" : 1,
+        "numIndexesAfter" : 2,
+        "createdCollectionAutomatically" : false,
+        "ok" : 1
+}
+
+//searching criteria
+
+db.products.find({$text:{$search:"awesome"}}).pretty()
+{
+        "_id" : ObjectId("624ab30de0792d9000c3218e"),
+        "title" : "A Book",
+        "description" : "This is a awesome book about a young artist!"
+}
+{
+        "_id" : ObjectId("624ab30de0792d9000c3218f"),
+        "title" : "Red T-Shirt",
+        "description" : "This T-Shirt is red and it's pretty awesome!"
+}
+
+db.products.find({$text:{$search:"book"}}).pretty()
+
+{
+        "_id" : ObjectId("624ab30de0792d9000c3218e"),
+        "title" : "A Book",
+        "description" : "This is a awesome book about a young artist!"
+}
+
+db.products.find({$text:{$search:"red book"}}).pretty() //it shows both documents but i'm searching for "red book". red book doesn't have in my documents
+
+{
+        "_id" : ObjectId("624ab30de0792d9000c3218e"),
+        "title" : "A Book",
+        "description" : "This is a awesome book about a young artist!"
+}
+{
+        "_id" : ObjectId("624ab30de0792d9000c3218f"),
+        "title" : "Red T-Shirt",
+        "description" : "This T-Shirt is red and it's pretty awesome!"
+}
+ 
+//accurate text search
+db.products.find({$text:{$search:"\"red book\""}}).pretty() //i couldn't get any documents. my documents doesn't contain red book
+
+db.products.find({$text:{$search:"awesome T-Shirt"}}).pretty() //second document has both words but it's showing as first document
+
+{
+        "_id" : ObjectId("624ab30de0792d9000c3218e"),
+        "title" : "A Book",
+        "description" : "This is a awesome book about a young artist!"
+}
+{
+        "_id" : ObjectId("624ab30de0792d9000c3218f"),
+        "title" : "Red T-Shirt",
+        "description" : "This T-Shirt is red and it's pretty awesome!"
+}
+
+db.products.find({$text:{$search:"awesome T-Shirt"}}, {Score:{$meta:"textScore"}}).pretty() //score will add to the documents
+
+{
+        "_id" : ObjectId("624ab30de0792d9000c3218f"),
+        "title" : "Red T-Shirt",
+        "description" : "This T-Shirt is red and it's pretty awesome!",
+        "Score" : 1.7999999999999998
+}
+{
+        "_id" : ObjectId("624ab30de0792d9000c3218e"),
+        "title" : "A Book",
+        "description" : "This is a awesome book about a young artist!",
+        "Score" : 0.625
+}
+
+//sort by text search
+db.products.find({$text:{$search:"awesome T-Shirt"}},{Score:{$meta:"textScore"}}).sort({score:{$meta:"textScore"}}).pretty() //based on score value it will sort
+
+//text indexes to exclude words
+db.products.find({$text:{$search:"awesome -T-Shirt"}}).pretty()
+
+{
+        "_id" : ObjectId("624ab30de0792d9000c3218e"),
+        "title" : "A Book",
+        "description" : "This is a awesome book about a young artist!"
+}
+

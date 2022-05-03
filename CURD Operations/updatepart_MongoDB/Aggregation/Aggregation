@@ -1,0 +1,243 @@
+
+// First stage
+/******Match********/
+
+db.persons.aggregate([
+    {$match:{age:{$gt:25}}}
+])
+
+db.persons.aggregate([
+    {$match:{tags:{$size:3}}}
+])
+
+/*******Group********/
+
+db.persons.aggregate([
+    {$group:{_id:"$age"}}
+])
+db.persons.aggregate([
+    {$group:{_id:{age:"$age", gender:"$gender"}}}
+])
+
+db.persons.aggregate([
+    {$group:{_id: "$company.location.country"}}
+])
+
+db.persons.aggregate([
+    {$group:{_id:{eyecolor:"$eyeColor", favoriteFruit:"$favoriteFruit", age:"$age"}}}
+])
+
+
+/***********Match and Group************/
+
+db.persons.aggregate([
+    //stage 1
+    {$match:{favorite:"banana"}},
+    //stage 2
+    {$group:{_id:{age:"$age", eyecolor:"$eyeColor"}}}
+])
+
+db.persons.aggregate([
+    {$match:{gender:"female"}},
+    {$group:{_id:{age:"$age", eyecolor:"$eyeColor", gender:"$gender"}}}
+])
+
+
+/******Swap two stages (group and match)*********/
+// this will not get the results because the order of stages is wrong
+
+db.persons.aggregate([
+    {$group:{_id:{eyecolor:"$eyeColor", age:"$age"}}},
+    {$match:{favoritefruit:"banana"}}
+])
+
+// this will work, from stage 1 it will sorted out the list and stage 2 conatin the stage1 keys
+db.persons.aggregate([
+    {$group:{_id:{age:"$age", gender:"$gender"}}},
+    {$match:{"_id.age":{$gt:30}}}
+])
+
+db.persons.aggregate([
+    {$group:{_id:{eyecolor:"$eyeColor", age:"$age"}}},
+    {$match:{"_id.eyecolor":"blue"}}
+])
+
+/*********Count***********/
+
+db.persons.aggregate([
+    {$count:"allDocumentsCount"}
+])
+
+/*******Different count methods************/
+
+db.persons.aggregate([]).toArray().length // it will take 1.7 sec
+
+db.persons.aggregate([]).itcount() // it will take 1.4 sec
+//above two methods are performed on client side
+
+db.persons.aggregate([{$count:"total"}]) //it will take 0.21 sec
+
+db.persons.find().count() //it will take 0.21 sec
+//above two methods are performed on server side
+
+/*******group and count stage**********/
+db.persons.aggregate([
+    {$group:{_id:"$age"}},
+    {$count:"agecount"}
+])
+
+db.persons.aggregate([
+    {$group:{_id:{eyecolor:"$eyecolor", gender:"$gender"}}},
+    {$count:"eyecolorAndgender"}
+])
+
+/*********match, group, and count stages***********/
+db.persons.aggregate([
+    {$match:{age:{$gte:25}}},
+    {group:{_id:{eyecolor:"$eyecolor", age:"$age"}}},
+    {$count:"eyecolorAndage"}
+])
+
+/***********Sort stage***************/
+
+db.persons.aggregate([
+    {$sort:{name:1, age:-1, gender: -1, eyecolor: 1}}
+])
+
+/**********group and sort************/
+
+db.persons.aggregate([
+    {$group:{_id:"$favoriteFruit"},
+    {$sort:{_id:1}}
+])
+
+db.persons.aggregate([
+    {$group:{_id:{eyecolor:"$eyeColor", favoritefruit:"$favoriteFruit"}}},
+    {$sort:{"_id.eyecolor":1, "_id.favoritefruit": -1}}
+])
+
+/************Project stage*******************/
+
+db.persons.aggregate([
+    {$project:{name:1, isActive:1, gender:1}} //it will display 4 fields because _id is default
+])
+
+db.persons.aggregate([
+    {$project:{_id: 0, name:1, isActive:1, gender:1}} //it will display 3 fields because  i dont need _id field
+])
+
+db.persons.aggregate([
+    {$project:{_id: 0, name:0, isActive:0, gender:0}} //except this fields remaining will be shown
+])
+
+/*********project with new fields*********/
+
+db.persons.aggregate([
+    {$project:{
+        _id:0,
+        index:1,
+        name:1,
+        info:{
+            eyes:"$eyeColor",
+            company:"$company.title"
+            country:"$company.location.country"
+        }
+    }}
+])
+
+/*********limit, match, group stages***************/
+
+db.persons.aggregate([
+    {$limit:100},
+    {$match:{eyecolor:{$ne:"blue"}}},
+    {$group:{_id:{eyecolor:"$eyeColor",favoritefruit:"$favoriteFruit"}}},
+    {$sort: {"_id.eyecolor":1, "_id.favoritefruit":-1}}
+])
+
+/**********group stage for arrays*************/
+
+db.persons.aggregate([
+    {$group:{_id:"$tags"}}
+])
+
+/**********unwind stage************/
+// here tags is an array. it contains the following fields
+/* tags:["veilt","ad", "consequent"]*********/
+
+db.persons.aggregate([
+    {$unwind:"$tags"},
+    {$project:{name:1, index:1, tags:1}}
+])
+/*output for the following field*/
+{_id:1, index:0, tags: veilt}
+{_id:1, index:0, tags: ad},
+{_id:1, index:0, tags: consequent}
+
+/***************unwind and group stages***********/
+
+db.persons.aggregate([
+    {$unwind:"$tags"},
+    {$group:{_id:"$tags"}}
+])
+
+/*output for the following field*/
+{_id: veilt},
+{_id: ad},
+{_id: consequent}
+
+/*********Accumulators**********/
+// 1.$sum 2. $avg 3. $min 4. $max
+db.persons.aggregate([
+    {$group:{_id:"$eyecolor", count:{$sum:1}}}
+])
+
+/*output for above command*/
+_id: blue,
+count: 343
+
+_id: green,
+count: 239
+
+/*************unwind, sum, group*************/
+
+db.persons.aggregate([
+    {$unwind:"$tags"},
+    {$group:{_id:"$tags", count:{$sum:1}}} /////output: {_id: nulla, count: 438},{_id: anim, count: 89}
+])
+
+/**********avg**********/
+db.persons.aggregate([
+    {$group:{_id:"$eyecolor", avgcount:{$avg:"$age"}}}
+])
+
+/***************unary operators*******************/
+// 1. $type 2. $out
+//$type
+db.persons.aggregate([
+    {$project:{name:1, eyecolortype:{$type:"$eyeColor"}}, agetype:{$type:"$age"}} // eyecolor type is string and age type is int
+])
+
+db.persons.aggregate([
+    {$proejct:{
+        name:1,
+        nameType:{$type:"$name"}, //String
+        ageType:{$type:"$age"}, // int
+        tagsType:{$type:"$tags"}, //array
+        companyType:{$type:"$company"} //object
+
+    }}
+])
+
+//$out
+// if you want to store aggregation operation results then use $out
+
+db.persons.aggregate([
+    {$project:{
+        name:1,
+        nameType:{$type:"$name"},
+        ageType:{$type:"$age"},
+        tagsType:{$type:"$tags"},
+        companyType:{$type:"$company"}
+    }},
+    {$out:"outCollection"} //it will create a new collection named as "outcollection" it stores the aggregation results
+])

@@ -1,0 +1,110 @@
+use contactData
+// insertOne
+
+db.persons.insertOne({"name":"Max", "age": 30, "hobbies":["Sports", "Cooking"]})
+//output
+
+        "acknowledged" : true,
+        "insertedId" : ObjectId("623c178179d1fa55fa883b0d")
+}
+
+db.persons.insertOne({"name":"Manuel", "age": 29, "hobbies":["Cars", "Cooking"]})
+//output
+{
+        "acknowledged" : true,
+        "insertedId" : ObjectId("623c17c779d1fa55fa883b0e")
+}
+
+//insertMany
+
+db.persons.insertMany([{"name":"Anna", "age":29, "hobbies":["Sports","Yoga"]}])
+//output
+{
+    "acknowledged" : true,
+    "insertedIds" : [
+            ObjectId("623c18c479d1fa55fa883b0f")
+    ]
+}
+
+db.persons.insertMany([{"name":"Maria", "age":31}, {"name":"Chris", "age":25}])
+//output
+{
+    "acknowledged" : true,
+    "insertedIds" : [
+        ObjectId("623c191379d1fa55fa883b10"),
+        ObjectId("623c191379d1fa55fa883b11")
+    ]
+}
+
+//insert
+
+db.persons.insert({"name":"Phil", "age":35})
+//output
+WriteResult({ "nInserted" : 1 })
+
+db.persons.insert([{"name":"Sandeep", "age":28},{"name":"Hans","age":38}])
+//output
+BulkWriteResult({
+    "writeErrors" : [ ],
+    "writeConcernErrors" : [ ],
+    "nInserted" : 2,
+    "nUpserted" : 0,
+    "nMatched" : 0,
+    "nModified" : 0,
+    "nRemoved" : 0,
+    "upserted" : [ ]
+})
+
+//ordered inserts
+
+db.hobbies.insertMany([{"_id":"sports", "name":"Sports"},{"_id":"cooking", "name":"Cooking"},{"_id":"cars","name":"Cars"}])
+//output - we can insert _id field
+{
+    "acknowledged" : true,
+    "insertedIds" : [
+            "sports",
+            "cooking",
+            "cars"
+    ]
+}
+
+db.hobbies.insertMany([{"_id":"yoga", "name":"Yoga"},{"_id":"cooking", "name":"Cooking"},{"_id":"hiking","name":"Hiking"}])
+
+//it shows error because it has duplicate entries. it will insert first document and from second document it will not execute further. we can change this behaviour using ordered option
+
+//ordered option
+db.hobbies.insertMany([{"_id":"yoga", "name":"Yoga"},{"_id":"cooking", "name":"Cooking"},{"_id":"hiking","name":"Hiking"}],{ordered:false})
+
+//output - this will execute the query eventhough it has an error
+
+//writeConcern
+
+db.persons.insertOne({"name":"Chrissy", "age":41},{writeConcern:{w:0}})
+//output
+{ "acknowledged" : false }
+
+db.persons.insertOne({"name":"Alex", "age":36},{writeConcern:{w:1}})
+//output
+{
+"acknowledged" : true,
+"insertedId" : ObjectId("623d508c8a22d06998320391")
+}
+
+db.persons.insertOne({"name":"Michael", "age":51},{writeConcern:{w:1, j:false}})
+//output
+{
+    "acknowledged" : true,
+    "insertedId" : ObjectId("623d50ce8a22d06998320392")
+}
+db.persons.insertOne({"name":"Michaela", "age":55},{writeConcern:{w:1, j:true}})
+//output
+{
+    "acknowledged" : true,
+    "insertedId" : ObjectId("623d510c8a22d06998320393")
+}
+db.persons.insertOne({"name":"Aliya", "age":22},{writeConcern:{w:1, j:true,wtimeout:200}})
+//output
+{
+    "acknowledged" : true,
+    "insertedId" : ObjectId("623d63328a22d06998320394")
+}

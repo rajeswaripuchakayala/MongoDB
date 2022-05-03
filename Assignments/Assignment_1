@@ -1,0 +1,219 @@
+// 1. Insert 3 patient records with atleast 1 history entry per patient
+// 2. Update patient data of 1 patient with new age, name and history entry
+// 3. Find all patients who are older than 30 (or a value of your choice)
+// 4. Delete all patients who got a cold as a disease
+
+// 1. Insert 3 patient records with atleast 1 history entry per patient
+
+db.patients.insert(
+    [
+        {
+            "firstName" : "Scott",
+            "lastName" : "Tolib",
+            "age" : 35,
+            "history" : [
+                {
+                    "disease" : "covid",
+                    "treatment" : "Isolate yourself in a well ventilated room"
+                },
+                {
+                    "disease" : "typhoid",
+                    "treatment" : "Antibiotic therapy"
+                }
+            ]
+        },
+        {
+            "firstName": "Karandeep",
+            "lastName": "Alun",
+            "age": 48,
+            "history": [
+                {
+                    "disease": "cold",
+                    "treatment": "Stay hydrated"
+                },
+                {
+                    "disease": "headache",
+                    "treatment": "Massage and small amounts of caffeine"
+                }
+            ]
+        },
+        {
+            "firstName": "Melanie",
+            "lastName": "Palace",
+            "age": 27,
+            "history": [
+                {
+                    "disease": "tuberculosis",
+                    "treatment": "antibiotics (isoniazid and rifampicin)"
+                },
+                {
+                    "disease": "pneumonia",
+                    "treatment": "rest, antibiotics (if it's likely be caused by a bacterial infection) and by drinking plenty of fluids"
+                }
+            ]
+        }
+   ]
+ )
+
+// ****************Find********************************* 
+db.patients.find().pretty()
+{
+    "_id" : ObjectId("62218aa9c97ac6370a1db6a0"),
+    "firstName" : "Scott",
+    "lastName" : "Tolib",
+    "age" : 35,
+    "history" : [
+        {
+            "disease" : "covid",
+            "treatment" : "Isolate yourself in a well ventilated room"
+        },
+        {
+            "disease" : "typhoid",
+            "treatment" : "Antibiotic therapy"
+        }
+    ]
+}
+{
+    "_id" : ObjectId("62219968f1620b2ab58b1924"),
+    "firstName" : "Karandeep",
+    "lastName" : "Alun",
+    "age" : 48,
+    "history" : [
+        {
+            "disease" : "cold",
+            "treatment" : "Stay hydrated"
+        },
+        {
+            "disease" : "headache",
+            "treatment" : "Massage and small amounts of caffeine"
+        }
+    ]
+}
+{
+    "_id" : ObjectId("62219968f1620b2ab58b1925"),
+    "firstName" : "Melanie",
+    "lastName" : "Palace",
+    "age" : 27,
+    "history" : [
+        {
+            "disease" : "tuberculosis",
+            "treatment" : "antibiotics (isoniazid and rifampicin)"
+        },
+        {
+            "disease" : "pneumonia",
+            "treatment" : "rest, antibiotics (if it's likely be caused by a bacterial infection) and by drinking plenty of fluids"
+        }
+    ]
+}
+
+// 2. Update patient data of 1 patient with new age, name and history entry
+
+db.patients.update({_id : ObjectId("62219968f1620b2ab58b1925")},{$set:{"firstName": "Alex","age":29,"history.1.disease":"cold","history.1.treatment": "stay hydrated"}})
+WriteResult({ "nMatched" : 1, "nUpserted" : 0, "nModified" : 1 })
+> db.patients.find().pretty()
+{
+    "_id" : ObjectId("62218aa9c97ac6370a1db6a0"),
+    "firstName" : "Scott",
+    "lastName" : "Tolib",
+    "age" : 35,
+    "history" : [
+        {
+            "disease" : "covid",
+            "treatment" : "Isolate yourself in a well ventilated room"
+        },
+        {
+            "disease" : "typhoid",
+            "treatment" : "Antibiotic therapy"
+        }
+    ]
+}
+{
+    "_id" : ObjectId("62219968f1620b2ab58b1924"),
+    "firstName" : "Karandeep",
+    "lastName" : "Alun",
+    "age" : 48,
+    "history" : [
+        {
+            "disease" : "cold",
+            "treatment" : "Stay hydrated"
+        },
+        {
+            "disease" : "headache",
+            "treatment" : "Massage and small amounts of caffeine"
+        }
+    ]
+}
+{
+    "_id" : ObjectId("62219968f1620b2ab58b1925"),
+    "firstName" : "Alex",
+    "lastName" : "Palace",
+    "age" : 29,
+    "history" : [
+        {
+            "disease" : "tuberculosis",
+            "treatment" : "antibiotics (isoniazid and rifampicin)"
+        },
+        {
+            "disease" : "cold",
+            "treatment" : "stay hydrated"
+        }
+    ]
+}
+
+// 3. Find all patients who are older than 30 (or a value of your choice)
+
+db.patients.find({age:{$gte:30}}).pretty()
+{
+    "_id" : ObjectId("62218aa9c97ac6370a1db6a0"),
+    "firstName" : "Scott",
+    "lastName" : "Tolib",
+    "age" : 35,
+    "history" : [
+        {
+            "disease" : "covid",
+            "treatment" : "Isolate yourself in a well ventilated room"
+        },
+        {
+            "disease" : "typhoid",
+            "treatment" : "Antibiotic therapy"
+        }
+    ]
+}
+{
+    "_id" : ObjectId("62219968f1620b2ab58b1924"),
+    "firstName" : "Karandeep",
+    "lastName" : "Alun",
+    "age" : 48,
+    "history" : [
+        {
+            "disease" : "cold",
+            "treatment" : "Stay hydrated"
+        },
+        {
+            "disease" : "headache",
+            "treatment" : "Massage and small amounts of caffeine"
+        }
+    ]
+}
+
+// 4. Delete all patients who got a cold as a disease
+
+db.patients.deleteMany({"history.disease": "cold"})
+{ "acknowledged" : true, "deletedCount" : 2 }
+> db.patients.find().pretty()
+{
+    "_id" : ObjectId("62218aa9c97ac6370a1db6a0"),
+    "firstName" : "Scott",
+    "lastName" : "Tolib",
+    "age" : 35,
+    "history" : [
+        {
+            "disease" : "covid",
+            "treatment" : "Isolate yourself in a well ventilated room"
+        },
+        {
+            "disease" : "typhoid",
+            "treatment" : "Antibiotic therapy"
+        }
+    ]
+}

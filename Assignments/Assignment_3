@@ -1,0 +1,46 @@
+// 1. Import the attached data intoa new database (e.g boxOffice) and collection (e.g movieStarts)
+// 2. Search all movies that have a rating higher than 9.2 and a runtime lower than 100 minutes
+// 3. Search all movies that have a genre of "drama" or "action"
+// 4. Search all movies where visitors exceeded expectedVisitors
+
+//Task1
+
+C:\Program Files\MongoDB\Server\5.0\bin> mongoimport boxoffice.json -d boxOffice -c movieStarts --jsonArray --drop
+2022-03-28T12:08:24.292+0530    connected to: mongodb://localhost/
+2022-03-28T12:08:24.294+0530    dropping: boxOffice.movieStarts
+2022-03-28T12:08:24.304+0530    3 document(s) imported successfully. 0 document(s) failed to import.
+
+show dbs
+admin          0.000GB
+awesomeplaces  0.000GB
+boxOffice      0.000GB
+companies      0.000GB
+config         0.000GB
+contactData    0.000GB
+financialData  0.000GB
+flights        0.000GB
+hospital       0.000GB
+local          0.000GB
+movieData      0.000GB
+shop           0.000GB
+support        0.000GB
+user 
+
+> use boxOffice
+switched to db boxOffice
+> show collections
+movieStarts
+
+//Task2
+
+db.movieStarts.find({"meta.rating":{$gt:9.2}, "meta.runtime":{$lt:100}}).pretty()
+
+db.movieStarts.find({$and:[{"meta.rating": {$gt:9.2}},{"meta.runtime":{$lt:100}}]}).pretty()
+
+//Task3
+
+db.movieStarts.find({$or:[{genre:"drama"}, {genre:"action"}]}).pretty()
+
+//Task4
+
+db.movieStarts.find({$expr:{$gt:["$visitors", "$expectedVisitors"]}}).pretty()

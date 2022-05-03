@@ -1,0 +1,16 @@
+//deleteOne
+
+db.users.deleteOne({"name":"Maria"})
+
+//deleteMany
+
+db.users.deleteMany({"totalAge":{$gt:50}, "isSporty": true}) //if the condition satidfies then delete the documents
+
+//deleteMany
+
+db.users.deleteMany({}) //it will delete all documents in the collections
+db.users.drop() // both are same
+
+//dropDatabase
+
+db.dropDatabase() //it will drop the database

@@ -1,0 +1,63 @@
+db.users.insertOne({
+    name:"Chris",
+    hobbies:["Sports", "Cooking", "Hiking"]
+})
+
+//updateOne
+
+db.users.updateOne({_id: ObjectId("6242903b85260dd7047ff4ab")},{$set:{"hobbies":[
+    {
+        "title":"Sports",
+        "frequency":5
+    },
+    {
+        "title":"Cooking",
+        "frequency": 3
+    },
+    {
+        "title":"Hiking",
+        "frequency": 2
+    }
+]}})
+
+//updateMany
+
+db.users.updateMany({"hobbies.title":"Sports"},{$set:{"isSporty":true}})
+
+//$set
+
+db.users.updateOne({ _id: ObjectId("6242903b85260dd7047ff4ab")},{$set:{"age":40, "phone":637828782}})
+
+//$inc
+
+db.users.updateOne({"name":"Chris"},{$inc:{age:-2}})
+
+//$min
+
+db.users.updateOne({name:"Chris"},{$min:{age:35}}) //here specified value is lower than the existing field, it will update it
+
+db.users.updateOne({name:"Chris"},{$min:{age:40}}) //it will not update it
+
+//$max
+//age: 35\
+//first statement will not work
+db.users.updateOne({name:"Chris"},{$max:{age:35}}) //here specified value is greater than the existing field, it will update it otherwise it will not update
+// this statement will work and update the value to 40 i.e., age:40
+db.users.updateOne({name:"Chris"},{$max:{age:40}})//
+
+//$mul
+
+//age:40
+db.users.updateOne({name:"Chris"},{$mul:{age:2}}) //it will multiple the existing value into specified value. Now age become 80
+
+//$unset
+
+db.users.updateMany({},{$unset:{phone:""}}) //it will remove the fields
+
+//$rename
+
+db.users.updateMany({},{$rename:{age:"totalAge"}}) //it will rename the field
+
+//upsert
+//if we couldn't find Maria document to update, it will inserted by passing upsert: true
+db.users.updateOne({name:"Maria"},{$set:{"age":29, "hobbies":[{"title":"Good Food", "frequency": 3}]}},{upsert:true})

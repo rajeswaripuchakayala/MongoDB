@@ -1,0 +1,99 @@
+/*************** Problem Statements ***************/
+ 1. Pick 3 points on google maps and store them in a collection
+ 2. Pick a point and find the nearest points within a min and max distance
+ 3. Pick an area and see which points (that are stored in your collection) it contains
+ 4. Store at least one area in a different collection
+ 5. Pick a point and find out which areas in your collection contain that point
+//1. Pick 3 points on google maps and store them in a collection
+db.areas.insertOne(
+    {
+        "name": "Tank Hill",
+        "location":{
+            "type": "Point",
+            "coordinates": [
+                -122.4613469,
+                37.7528281
+            ]
+        }
+    
+    }
+)
+db.areas.insertOne(
+    {
+        "name": "Mission Dolores Park",
+        "location":{
+            "type": "Point",
+            "coordinates":[
+                -122.4293032,
+                37.7597746
+            ]
+        }
+    }
+),
+db.areas.insertOne(
+    {
+        "name": "St Francis Park",
+        "location":{
+            "type": "Point",
+            "coordinates":[
+                -122.461347,
+                37.7529827
+            ]
+        }
+    }
+)
+
+db.areas.find().pretty()
+{
+        "_id" : ObjectId("624d7984db56aa81b00b8ba6"),
+        "name" : "Tank Hill",
+        "location" : {
+                "type" : "Point",
+                "coordinates" : [
+                        -122.4613469,
+                        37.7528281
+                ]
+        }
+}
+{
+        "_id" : ObjectId("624d7a67db56aa81b00b8ba7"),
+        "name" : "Mission Dolores Park",
+        "location" : {
+                "type" : "Point",
+                "coordinates" : [
+                        -122.4293032,
+                        37.7597746
+                ]
+        }
+}
+{
+        "_id" : ObjectId("624d7a79db56aa81b00b8ba8"),
+        "name" : "St Francis Park",
+        "location" : {
+                "type" : "Point",
+                "coordinates" : [
+                        -122.461347,
+                        37.7529827
+                ]
+        }
+}
+//2. Pick a point and find the nearest points within a min and max distance
+db.areas.createIndex({location:"2dsphere"})
+db.areas.find({location:{$near:{$geometry:{type: "Point", coordinates: [-122.4760749, 37.7543523]}, $maxDistance: 2000, $minDistance: 0}}})
+
+//3. Pick an area and see which points (that are stored in your collection) it contains
+const p1=[-122.45064, 37.76915]
+const p2=[-122.43725, 37.75368]
+const p3=[-122.41347, 37.76766]
+
+db.areas.find({location:{$geoWithin:{$geometry:{type:"Polygon", coordinates:[[p1,p2,p3,p1]]}}}})
+
+// 4. Store at least one area in a different collection
+
+db.places.insertOne({
+    loc:{type: "Polygon", coordinates: [[p1,p2,p3,p1]]}
+})
+
+// 5. Pick a point and find out which areas in your collection contain that point
+
+db.places.find({loc:{$geoIntersects:{$geometry:{type:"Point", coordinates:[-122.43359, 37.76561]}}}})
